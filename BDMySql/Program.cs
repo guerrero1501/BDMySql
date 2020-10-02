@@ -16,11 +16,17 @@ namespace BDMySql
         {
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
-            Console.WriteLine(JsonConvert.SerializeObject(contextMySql.WpTermTaxonomy.Where(t => t.Taxonomy == "product_cat").ToList()));
+            //Console.WriteLine(JsonConvert.SerializeObject(contextMySql.WpTermTaxonomy.Where(t => t.Taxonomy == "product_cat").ToList()));
 
-            string path = Directory.GetParent(@"Upload\ExcelDocument\").FullName + @"\CategoriasAtributos.xlsx";
+            var dataSql = contextSqlServer.Categorias.Where(c=>c.CategName !="").Select(c=>c.CategName).ToList();
 
-                   
+            //var existingFData = contextMySql.WpTerms.Where(w => w.Name);
+
+            //foreach (var ) 
+            //{
+                
+            //}
+
         }
     }
 }
