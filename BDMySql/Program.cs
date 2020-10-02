@@ -18,15 +18,14 @@ namespace BDMySql
             sellerContext contextSqlServer = new sellerContext();
             //Console.WriteLine(JsonConvert.SerializeObject(contextMySql.WpTermTaxonomy.Where(t => t.Taxonomy == "product_cat").ToList()));
 
-            var dataSql = contextSqlServer.Categorias.Where(c=>c.CategName !="").Select(c=>c.CategName).ToList();
+            var dataSql = contextSqlServer.Categorias.Where(c=>c.CategName !="").ToList();
 
-            //var existingFData = contextMySql.WpTerms.Where(w => w.Name);
-
-            //foreach (var ) 
-            //{
-                
-            //}
-
+            var existingFData = contextMySql.WpTerms.Where(w => dataSql.Any(a=>a.CategName == w.Name));
+           
+            foreach (var data in existingFData)
+            {
+                //contextSqlServer.Categorias.Where(c => c.CategId == idParent.ToString());
+            }
         }
     }
 }
