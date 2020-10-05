@@ -21,7 +21,8 @@ namespace BDMySql.DataSql
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=190.146.25.236;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;");
+                //"Data Source=190.146.25.236;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;"
+                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS; Database=PruebaCategoriasAtributos;Trusted_Connection=True;MultipleActiveResultSets=True;");
             }
         }
 
@@ -29,7 +30,8 @@ namespace BDMySql.DataSql
         {
             modelBuilder.Entity<Categorias>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.Id)
+                    .HasName("PRIMARY");
 
                 entity.Property(e => e.CategId)
                     .HasColumnName("Categ Id")

@@ -5,11 +5,11 @@ namespace BDMySql.DTO
     public class WpTermDTO
     {
         [JsonPropertyName("id")]
-        public int Id { get; set; }
+        public ulong TermId { get; set; }
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("parent")]
-        public int Parent { get; set; }
+        public ulong Parent { get; set; }
         [JsonPropertyName("slug")]
         public string Slug { get; set; }
         [JsonIgnore]
