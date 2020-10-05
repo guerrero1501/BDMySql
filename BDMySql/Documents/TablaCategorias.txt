@@ -1,0 +1,12 @@
+CREATE TABLE [dbo].[Categorias] (
+[Id] int IDENTITY (1,1) NOT NULL, [Nivel] nvarchar(255),
+[Categ Id] nvarchar(255),
+[Categ Name] nvarchar(255),
+[Categ Slug] nvarchar(255),
+[Parent Id] nvarchar(255),
+[Id_Attribute] nvarchar(255),
+[Name_Attribute] nvarchar(255),
+[ID_Value] nvarchar(255),
+[Name_Value] nvarchar(255),
+[Orden] float, CONSTRAINT PK_CategoriasId PRIMARY KEY (Id)
+)

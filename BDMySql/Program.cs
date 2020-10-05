@@ -47,38 +47,41 @@ namespace BDMySql
                 }
                 else
                 {
-                    WpTerms wpTerms = new WpTerms
-                    {
-                        TermId = ulong.Parse(data.CategId),
-                        Name = data.CategName,
-                        Slug = data.CategSlug
-                    };
+                    //WpTerms wpTerms = new WpTerms
+                    //{
+                    //    TermId = ulong.Parse(data.CategId),
+                    //    Name = data.CategName,
+                    //    Slug = data.CategSlug
+                    //};
 
-                    contextMySql.WpTerms.Add(wpTerms);
+                    //contextMySql.WpTerms.Add(wpTerms);
 
-                    WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
-                    {
-                        TermId = ulong.Parse(data.CategId),
-                        Taxonomy = "product_cat",
-                        Parent = ulong.Parse(data.ParentId)
-                    };
+                    //WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
+                    //{
+                    //    TermId = ulong.Parse(data.CategId),
+                    //    Taxonomy = "product_cat",
+                    //    Parent = ulong.Parse(data.ParentId)
+                    //};
 
-                    contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
+                    //contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
 
-                    contextMySql.SaveChanges();
+                    //contextMySql.SaveChanges();
                 }
             }
 
             await contextSqlServer.SaveChangesAsync();
 
+            //await InsertAttributes();
         }
 
-        public async Task InsertAttributes()
+        public static async Task InsertAttributes()
         {
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
 
-            var dataSqlServer = await contextSqlServer.Categorias.OrderBy(o => o.Orden).ToListAsync();
+            var dataSqlServer = await contextSqlServer.Categorias.OrderBy(o => o.Orden).GroupBy(g => g.NameAttribute).ToListAsync();
+
+
         }
 
         public static void WriteToNewExcel(List<Categorias> excelExportModels, string path)

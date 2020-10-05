@@ -22,7 +22,8 @@ namespace BDMySql.DataSql
             if (!optionsBuilder.IsConfigured)
             {
                 //"Data Source=190.146.25.236;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;"
-                optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS; Database=PruebaCategoriasAtributos;Trusted_Connection=True;MultipleActiveResultSets=True;");
+                //"Server=.\\SQLEXPRESS; Database=PruebaCategoriasAtributos;Trusted_Connection=True;MultipleActiveResultSets=True;"
+                optionsBuilder.UseSqlServer("Data Source=190.146.25.236;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;MultipleActiveResultSets=True;");
             }
         }
 
