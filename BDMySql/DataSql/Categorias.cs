@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BDMySql.DataSql
 {
@@ -14,8 +12,9 @@ namespace BDMySql.DataSql
         public string CategSlug { get; set; }
         public string ParentId { get; set; }
         public string IdAttribute { get; set; }
+        public double Id_ParentCategory { get; set; }
         public string NameAttribute { get; set; }
-        public string IdValue { get; set; }
+        public string Slug_Attribute { get; set; }
         public string NameValue { get; set; }
         public double Orden { get; set; }
     }

@@ -33,43 +33,62 @@ namespace BDMySql
                 }
             ).ToListAsync();
 
-            foreach (var data in dataSqlServer)
-            {
-                var prentId = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId);
-                var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
-                if (a != null)
-                {
-                    var idCategory = data.CategId;
+            //foreach (var data in dataSqlServer)
+            //{
+            //    var prentId = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId);
+            //    var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
+            //    if (a != null)
+            //    {
+            //        var idCategory = data.CategId;
 
-                    data.CategId = a.TermId.ToString();
+            //        data.CategId = a.TermId.ToString();
 
-                    dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
-                }
-                else
-                {
-                    //WpTerms wpTerms = new WpTerms
-                    //{
-                    //    TermId = ulong.Parse(data.CategId),
-                    //    Name = data.CategName,
-                    //    Slug = data.CategSlug
-                    //};
+            //        dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => { f.ParentId = a.TermId.ToString();  f.Id_ParentCategory = a.TermId.ToString(); } );
+            //    }
+            //    else
+            //    {
+            //        WpTerms wpTerms = new WpTerms
+            //        {
+            //            TermId = ulong.Parse(data.CategId),
+            //            Name = data.CategName,
+            //            Slug = data.CategSlug,
+            //            TermGroup = 0
+            //        };
 
-                    //contextMySql.WpTerms.Add(wpTerms);
+            //        contextMySql.WpTerms.Add(wpTerms);
 
-                    //WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
-                    //{
-                    //    TermId = ulong.Parse(data.CategId),
-                    //    Taxonomy = "product_cat",
-                    //    Parent = ulong.Parse(data.ParentId)
-                    //};
+            //        WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
+            //        {
+            //            TermTaxonomyId = ulong.Parse(data.CategId),
+            //            TermId = ulong.Parse(data.CategId),
+            //            Taxonomy = "product_cat",
+            //            Parent = ulong.Parse(data.ParentId)
+            //        };
 
-                    //contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
+            //        contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
 
-                    //contextMySql.SaveChanges();
-                }
-            }
+            //        List<WpTermmeta> wpTermmetaList = new List<WpTermmeta>();
 
-            await contextSqlServer.SaveChangesAsync();
+            //        for (int i = 0; i < 6; i++)
+            //        {
+            //            string[] key = new string[] { "order", "banner", "_banner", "display_type", "thumbnail_id", "product_count_product_cat" };
+            //            string[] value = new string[] { "0", "", "field_5d0065cd0e7f9", "", "0", "0" };
+            //            WpTermmeta wpTermmeta = new WpTermmeta
+            //            {
+            //                TermId = ulong.Parse(data.CategId),
+            //                MetaKey = key[i],
+            //                MetaValue = value[i]
+            //            };
+            //            wpTermmetaList.Add(wpTermmeta);
+            //        }
+
+            //        contextMySql.WpTermmeta.AddRange(wpTermmetaList);
+
+            //        contextMySql.SaveChanges();
+            //    }
+            //}
+
+            //await contextSqlServer.SaveChangesAsync();
 
             //await InsertAttributes();
         }
@@ -79,8 +98,65 @@ namespace BDMySql
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
 
-            var dataSqlServer = await contextSqlServer.Categorias.OrderBy(o => o.Orden).GroupBy(g => g.NameAttribute).ToListAsync();
+            var dataSqlServer = await contextSqlServer.Categorias.OrderBy(o => o.Orden).GroupBy(g => new { g.NameAttribute, g.IdAttribute, g.NameValue }).ToListAsync();
 
+            ulong OptionId = 2000;
+
+            foreach (var item in dataSqlServer)
+            {
+                WpWoocommerceAttributeTaxonomies wpWoocommerceAttributeTaxonomies = new WpWoocommerceAttributeTaxonomies
+                {
+                    AttributeId = ulong.Parse(item.Key.IdAttribute),
+                    AttributeName = item.Key.NameAttribute.ToLower(),
+                    AttributeLabel = item.Key.NameAttribute,
+                    AttributeType = "select",
+                    AttributeOrderby = "menu_order",
+                    AttributePublic = 0
+                };
+
+                await contextMySql.WpWoocommerceAttributeTaxonomies.AddAsync(wpWoocommerceAttributeTaxonomies);
+
+                await contextMySql.SaveChangesAsync();
+
+                var options = item.Key.NameValue.Split(",");
+
+                foreach (var option in options)
+                {
+                    WpTerms wpTerms = new WpTerms
+                    {
+                        TermId = OptionId,
+                        Name = option,
+                        Slug = option.ToLower().Replace(" " ,"-"),
+                        TermGroup = 0
+                    };
+
+                    await contextMySql.WpTerms.AddAsync(wpTerms);
+
+                    WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
+                    {
+                        TermTaxonomyId = OptionId,
+                        TermId = OptionId,
+                        Taxonomy = "pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
+                        Parent = 0,
+                        Count = 0
+                    };
+
+                    await contextMySql.WpTermTaxonomy.AddAsync(wpTermTaxonomy);
+
+                    WpTermmeta wpTermmeta = new WpTermmeta
+                    {
+                        TermId = OptionId,
+                        MetaKey = "order_pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
+                        MetaValue = "0"
+                    };
+
+                    await contextMySql.WpTermmeta.AddAsync(wpTermmeta);
+
+                    await contextMySql.SaveChangesAsync();
+
+                    OptionId++;
+                }
+            }
 
         }
 

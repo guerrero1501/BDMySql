@@ -50,10 +50,6 @@ namespace BDMySql.DataSql
                     .HasColumnName("Id_Attribute")
                     .HasMaxLength(255);
 
-                entity.Property(e => e.IdValue)
-                    .HasColumnName("ID_Value")
-                    .HasMaxLength(255);
-
                 entity.Property(e => e.NameAttribute)
                     .HasColumnName("Name_Attribute")
                     .HasMaxLength(255);
