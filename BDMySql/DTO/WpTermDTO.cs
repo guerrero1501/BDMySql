@@ -14,5 +14,7 @@ namespace BDMySql.DTO
         public string Slug { get; set; }
         [JsonIgnore]
         public int Nivel { get; set; }
+        [JsonIgnore]
+        public int OriginIdSql { get; set; }
     }
 }
