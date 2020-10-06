@@ -110,7 +110,7 @@ namespace BDMySql.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("uid=root;server=localhost;port=3306;sshHostName = 206.189.177.169; sshKeyFile = C:\\keys\\id_rsa.ppk; sshPort = 22", x => x.ServerVersion("5.7.29-mysql"));
+                optionsBuilder.UseMySql("server=190.146.25.236;port=3306;database=luegopago;uid=admin;pwd=Dna9201,,,;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
                 //optionsBuilder.UseMySql("server=luegopago.mysql.database.azure.com;port=3306;database=luegopago-dev;uid=user12@luegopago;pwd=MWYyZDFlMmU2N2Rm234s;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
             }
         }
