@@ -110,8 +110,9 @@ namespace BDMySql.Data
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseMySql("server=190.158.197.177;port=3306;database=luegopago;uid=admin;pwd=Dna9201,,,;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
+                //optionsBuilder.UseMySql("server=190.158.197.177;port=3306;database=luegopago;uid=admin;pwd=Dna9201,,,;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
                 //optionsBuilder.UseMySql("server=luegopago.mysql.database.azure.com;port=3306;database=luegopago-dev;uid=user12@luegopago;pwd=MWYyZDFlMmU2N2Rm234s;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
+                optionsBuilder.UseMySql("server=127.0.0.1;port=3306;database=luegopago;uid=root;sslmode=Preferred", x => x.ServerVersion("5.7.29-mysql"));
             }
         }
 

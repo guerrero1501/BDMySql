@@ -23,7 +23,8 @@ namespace BDMySql.DataSql
             {
                 //"Data Source=190.146.25.236;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;"
                 //"Server=.\\SQLEXPRESS; Database=PruebaCategoriasAtributos;Trusted_Connection=True;MultipleActiveResultSets=True;"
-                optionsBuilder.UseSqlServer("Data Source=190.158.197.177;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;");
+                //optionsBuilder.UseSqlServer("Data Source=190.158.197.177;Initial Catalog=seller;User ID=sa;Password=Dna9201,,,;");
+                optionsBuilder.UseSqlServer("Data Source=192.168.1.50;Initial Catalog=seller;User ID=sa;Password=123456;MultipleActiveResultSets=True;");
             }
         }
 
