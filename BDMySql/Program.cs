@@ -40,8 +40,6 @@ namespace BDMySql
                 var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
                 if (a != null)
                 {
-                    Console.WriteLine("");
-
                     var idCategory = data.CategId;
 
                     data.CategId = a.TermId.ToString();
