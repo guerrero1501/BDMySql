@@ -4,6 +4,7 @@ using BDMySql.DTO;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -39,13 +40,15 @@ namespace BDMySql
                 var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
                 if (a != null)
                 {
+                    Console.WriteLine("");
+
                     var idCategory = data.CategId;
 
                     data.CategId = a.TermId.ToString();
 
                     dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
 
-                    dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = ulong.Parse(idCategory));
+                    dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = a.TermId);
                 }
                 else
                 {
