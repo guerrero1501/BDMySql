@@ -4,6 +4,7 @@ using BDMySql.DTO;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -15,6 +16,29 @@ namespace BDMySql
     class Program
     {
         static async Task Main(string[] args)
+        {
+
+            Console.WriteLine("Ingrese C para actualizar categorias, A para actualizar los attributos o R para actualizar la relaciones.");
+            Console.WriteLine("Ingrese letra y luego presione Enter: ");
+            var response = Convert.ToChar(Console.Read());
+            if (response == 'C')
+            {
+                Console.WriteLine("Inicio del proceso Categorias...");
+                await InsertCategories();
+            }
+            else if (response == 'A')
+            {
+                Console.WriteLine("Inicio del proceso Atributos...");
+                await InsertCategories();
+            }
+            else if (response == 'R')
+            {
+                Console.WriteLine("Inicio del proceso Relación...");
+                //Aqui va el metodo
+            }
+        }
+
+        private static async Task InsertCategories() 
         {
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
@@ -33,8 +57,11 @@ namespace BDMySql
                 }
             ).ToListAsync();
 
+            var register = -1;
+            var showRegister = 1000;
             foreach (var data in dataSqlServer)
             {
+                register++;
                 var prentId = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId);
                 var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
                 if (a != null)
@@ -45,7 +72,7 @@ namespace BDMySql
 
                     dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
 
-                    dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = ulong.Parse(idCategory));
+                    //dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = a.TermId);
                 }
                 else
                 {
@@ -84,19 +111,21 @@ namespace BDMySql
                         };
                         wpTermmetaList.Add(wpTermmeta);
                     }
-
                     contextMySql.WpTermmeta.AddRange(wpTermmetaList);
 
                     contextMySql.SaveChanges();
                 }
+                if (register == showRegister)
+                {
+                    Console.WriteLine("Inserted Categories" + data.CategId + " count " + register + " % " + (register * 100 / dataSqlServer.Count()));
+                    showRegister += 1000;
+                }
             }
 
             await contextSqlServer.SaveChangesAsync();
-
-            //await InsertAttributes();
         }
 
-        public static async Task InsertAttributes()
+        private static async Task InsertAttributes()
         {
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
@@ -123,8 +152,11 @@ namespace BDMySql
 
                 var options = item.Key.NameValue.Split(",");
 
+                var register = -1;
+                var showRegister = 1000;
                 foreach (var option in options)
                 {
+                    register++;
                     WpTerms wpTerms = new WpTerms
                     {
                         TermId = OptionId,
@@ -158,9 +190,14 @@ namespace BDMySql
                     await contextMySql.SaveChangesAsync();
 
                     OptionId++;
+
+                    if (register == showRegister)
+                    {
+                        Console.WriteLine("Inserted Attributes" + option + " count " + register + " % " + (register * 100 / dataSqlServer.Count()));
+                        showRegister += 1000;
+                    }
                 }
             }
-
         }
 
         public static void WriteToNewExcel(List<Categorias> excelExportModels, string path)
