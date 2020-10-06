@@ -33,62 +33,65 @@ namespace BDMySql
                 }
             ).ToListAsync();
 
-            //foreach (var data in dataSqlServer)
-            //{
-            //    var prentId = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId);
-            //    var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
-            //    if (a != null)
-            //    {
-            //        var idCategory = data.CategId;
+            foreach (var data in dataSqlServer)
+            {
+                var prentId = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId);
+                var a = existingFData.FirstOrDefault(w => w.Name.ToLower() == data.CategName.ToLower() && w.Parent == prentId);
+                if (a != null)
+                {
+                    var idCategory = data.CategId;
 
-            //        data.CategId = a.TermId.ToString();
+                    data.CategId = a.TermId.ToString();
 
-            //        dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => { f.ParentId = a.TermId.ToString();  f.Id_ParentCategory = a.TermId.ToString(); } );
-            //    }
-            //    else
-            //    {
-            //        WpTerms wpTerms = new WpTerms
-            //        {
-            //            TermId = ulong.Parse(data.CategId),
-            //            Name = data.CategName,
-            //            Slug = data.CategSlug,
-            //            TermGroup = 0
-            //        };
+                    dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
 
-            //        contextMySql.WpTerms.Add(wpTerms);
+                    dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = ulong.Parse(idCategory));
+                }
+                else
+                {
+                    WpTerms wpTerms = new WpTerms
+                    {
+                        TermId = ulong.Parse(data.CategId),
+                        Name = data.CategName,
+                        Slug = data.CategSlug,
+                        TermGroup = 0
+                    };
 
-            //        WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
-            //        {
-            //            TermTaxonomyId = ulong.Parse(data.CategId),
-            //            TermId = ulong.Parse(data.CategId),
-            //            Taxonomy = "product_cat",
-            //            Parent = ulong.Parse(data.ParentId)
-            //        };
+                    contextMySql.WpTerms.Add(wpTerms);
 
-            //        contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
+                    WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
+                    {
+                        TermTaxonomyId = ulong.Parse(data.CategId),
+                        TermId = ulong.Parse(data.CategId),
+                        Taxonomy = "product_cat",
+                        Description = string.Empty,
+                        Parent = ulong.Parse(string.IsNullOrEmpty(data.ParentId) ? "0" : data.ParentId)
+                    };
 
-            //        List<WpTermmeta> wpTermmetaList = new List<WpTermmeta>();
+                    contextMySql.WpTermTaxonomy.Add(wpTermTaxonomy);
 
-            //        for (int i = 0; i < 6; i++)
-            //        {
-            //            string[] key = new string[] { "order", "banner", "_banner", "display_type", "thumbnail_id", "product_count_product_cat" };
-            //            string[] value = new string[] { "0", "", "field_5d0065cd0e7f9", "", "0", "0" };
-            //            WpTermmeta wpTermmeta = new WpTermmeta
-            //            {
-            //                TermId = ulong.Parse(data.CategId),
-            //                MetaKey = key[i],
-            //                MetaValue = value[i]
-            //            };
-            //            wpTermmetaList.Add(wpTermmeta);
-            //        }
+                    List<WpTermmeta> wpTermmetaList = new List<WpTermmeta>();
 
-            //        contextMySql.WpTermmeta.AddRange(wpTermmetaList);
+                    for (int i = 0; i < 6; i++)
+                    {
+                        string[] key = new string[] { "order", "banner", "_banner", "display_type", "thumbnail_id", "product_count_product_cat" };
+                        string[] value = new string[] { "0", "", "field_5d0065cd0e7f9", "", "0", "0" };
+                        WpTermmeta wpTermmeta = new WpTermmeta
+                        {
+                            TermId = ulong.Parse(data.CategId),
+                            MetaKey = key[i],
+                            MetaValue = value[i]
+                        };
+                        wpTermmetaList.Add(wpTermmeta);
+                    }
 
-            //        contextMySql.SaveChanges();
-            //    }
-            //}
+                    contextMySql.WpTermmeta.AddRange(wpTermmetaList);
 
-            //await contextSqlServer.SaveChangesAsync();
+                    contextMySql.SaveChanges();
+                }
+            }
+
+            await contextSqlServer.SaveChangesAsync();
 
             //await InsertAttributes();
         }
