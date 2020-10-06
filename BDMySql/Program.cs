@@ -73,6 +73,7 @@ namespace BDMySql
                     dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
 
                     //dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = a.TermId);
+
                 }
                 else
                 {
