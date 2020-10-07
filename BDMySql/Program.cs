@@ -29,7 +29,7 @@ namespace BDMySql
             else if (response == 'A')
             {
                 Console.WriteLine("Inicio del proceso Atributos...");
-                await InsertCategories();
+                await InsertAttributes();
             }
             else if (response == 'R')
             {
@@ -131,16 +131,20 @@ namespace BDMySql
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
 
-            var dataSqlServer = await contextSqlServer.Categorias.OrderBy(o => o.Orden).GroupBy(g => new { g.NameAttribute, g.IdAttribute, g.NameValue }).ToListAsync();
+            var dataSqlServer =  contextSqlServer.Categorias.ToList().GroupBy(g => new { g.NameAttribute, g.IdAttribute, g.NameValue });//.ToListAsync();
 
-            ulong OptionId = 2000;
+            ulong OptionId = 20000;
+            var register = -1;
+            var showRegister = 1000;
 
             foreach (var item in dataSqlServer)
             {
+                register++;
+
                 WpWoocommerceAttributeTaxonomies wpWoocommerceAttributeTaxonomies = new WpWoocommerceAttributeTaxonomies
                 {
                     AttributeId = ulong.Parse(item.Key.IdAttribute),
-                    AttributeName = item.Key.NameAttribute.ToLower(),
+                    AttributeName = item.Key.NameAttribute.ToLower().Replace(" ", "-"),
                     AttributeLabel = item.Key.NameAttribute,
                     AttributeType = "select",
                     AttributeOrderby = "menu_order",
@@ -149,54 +153,43 @@ namespace BDMySql
 
                 await contextMySql.WpWoocommerceAttributeTaxonomies.AddAsync(wpWoocommerceAttributeTaxonomies);
 
+                if (item.Key.NameValue!= null) 
+                {
+                    var options = item.Key.NameValue.Split(",");
+
+                    foreach (var option in options)
+                    {
+                        WpTerms wpTerms = new WpTerms
+                        {
+                            TermId = OptionId,
+                            Name = option,
+                            Slug = option.ToLower().Replace(" ", "-"),
+                            TermGroup = 0
+                        };
+
+                        await contextMySql.WpTerms.AddAsync(wpTerms);
+
+                        WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
+                        {
+                            TermTaxonomyId = OptionId,
+                            TermId = OptionId,
+                            Taxonomy = "pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
+                            Parent = 0,
+                            Count = 0
+                        };
+
+                        await contextMySql.WpTermTaxonomy.AddAsync(wpTermTaxonomy);
+
+                        OptionId++;
+                    }
+                }
+
                 await contextMySql.SaveChangesAsync();
 
-                var options = item.Key.NameValue.Split(",");
-
-                var register = -1;
-                var showRegister = 1000;
-                foreach (var option in options)
+                if (register == showRegister)
                 {
-                    register++;
-                    WpTerms wpTerms = new WpTerms
-                    {
-                        TermId = OptionId,
-                        Name = option,
-                        Slug = option.ToLower().Replace(" " ,"-"),
-                        TermGroup = 0
-                    };
-
-                    await contextMySql.WpTerms.AddAsync(wpTerms);
-
-                    WpTermTaxonomy wpTermTaxonomy = new WpTermTaxonomy
-                    {
-                        TermTaxonomyId = OptionId,
-                        TermId = OptionId,
-                        Taxonomy = "pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
-                        Parent = 0,
-                        Count = 0
-                    };
-
-                    await contextMySql.WpTermTaxonomy.AddAsync(wpTermTaxonomy);
-
-                    WpTermmeta wpTermmeta = new WpTermmeta
-                    {
-                        TermId = OptionId,
-                        MetaKey = "order_pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
-                        MetaValue = "0"
-                    };
-
-                    await contextMySql.WpTermmeta.AddAsync(wpTermmeta);
-
-                    await contextMySql.SaveChangesAsync();
-
-                    OptionId++;
-
-                    if (register == showRegister)
-                    {
-                        Console.WriteLine("Inserted Attributes" + option + " count " + register + " % " + (register * 100 / dataSqlServer.Count()));
-                        showRegister += 1000;
-                    }
+                    Console.WriteLine("Inserted Attributes count " + register + " % " + (register * 100 / dataSqlServer.Count()));
+                    showRegister += 1000;
                 }
             }
         }
