@@ -7,8 +7,10 @@ using OfficeOpenXml.Table;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BDMySql
@@ -45,6 +47,8 @@ namespace BDMySql
 
             var dataSqlServer = await contextSqlServer.Categorias.Where(c => c.CategName != "").OrderBy(o => o.Orden).ToListAsync();
 
+            var dataSqlServerAll = await contextSqlServer.Categorias.OrderBy(o => o.Orden).ToListAsync();
+
             var existingFData = await (
                 from terms in contextMySql.WpTerms
                 from termTaxonomy in contextMySql.WpTermTaxonomy.Where(w => w.Taxonomy == "product_cat" && w.TermId == terms.TermId)
@@ -72,7 +76,7 @@ namespace BDMySql
 
                     dataSqlServer.Where(w => w.ParentId == idCategory).ToList().ForEach(f => f.ParentId = a.TermId.ToString());
 
-                    //dataSqlServer.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = a.TermId);
+                    dataSqlServerAll.Where(w => w.Id_ParentCategory.ToString() == idCategory).ToList().ForEach(f => f.Id_ParentCategory = a.TermId);
 
                 }
                 else
@@ -123,7 +127,7 @@ namespace BDMySql
                 }
             }
 
-            await contextSqlServer.SaveChangesAsync();
+            await contextSqlServer.SaveChangesAsync();          
         }
 
         private static async Task InsertAttributes()
@@ -131,11 +135,11 @@ namespace BDMySql
             luegopagodevContext contextMySql = new luegopagodevContext();
             sellerContext contextSqlServer = new sellerContext();
 
-            var dataSqlServer =  contextSqlServer.Categorias.ToList().GroupBy(g => new { g.NameAttribute, g.IdAttribute, g.NameValue });//.ToListAsync();
+            var dataSqlServer =  contextSqlServer.Categorias.ToList().GroupBy(g => new { g.NameAttribute, g.IdAttribute, g.NameValue, g.Slug_Attribute });//.ToListAsync();
 
             ulong OptionId = 20000;
             var register = -1;
-            var showRegister = 1000;
+            var showRegister = 200;
 
             foreach (var item in dataSqlServer)
             {
@@ -144,7 +148,7 @@ namespace BDMySql
                 WpWoocommerceAttributeTaxonomies wpWoocommerceAttributeTaxonomies = new WpWoocommerceAttributeTaxonomies
                 {
                     AttributeId = ulong.Parse(item.Key.IdAttribute),
-                    AttributeName = item.Key.NameAttribute.ToLower().Replace(" ", "-"),
+                    AttributeName = item.Key.Slug_Attribute,
                     AttributeLabel = item.Key.NameAttribute,
                     AttributeType = "select",
                     AttributeOrderby = "menu_order",
@@ -163,7 +167,7 @@ namespace BDMySql
                         {
                             TermId = OptionId,
                             Name = option,
-                            Slug = option.ToLower().Replace(" ", "-"),
+                            Slug = RemoveDiacritics(option.ToLower().Replace(" ", "-")),
                             TermGroup = 0
                         };
 
@@ -173,12 +177,22 @@ namespace BDMySql
                         {
                             TermTaxonomyId = OptionId,
                             TermId = OptionId,
-                            Taxonomy = "pa_" + item.Key.NameAttribute.ToLower().Replace(" ", "-"),
+                            Taxonomy = "pa_" + item.Key.Slug_Attribute,
                             Parent = 0,
+                            Description = string.Empty,
                             Count = 0
                         };
 
                         await contextMySql.WpTermTaxonomy.AddAsync(wpTermTaxonomy);
+
+                        WpTermmeta wpTermmeta = new WpTermmeta
+                        {
+                            TermId = OptionId,
+                            MetaKey = "order_pa_" + item.Key.Slug_Attribute,
+                            MetaValue = "0"
+                        };
+                        
+                        await contextMySql.WpTermmeta.AddAsync(wpTermmeta);
 
                         OptionId++;
                     }
@@ -189,9 +203,33 @@ namespace BDMySql
                 if (register == showRegister)
                 {
                     Console.WriteLine("Inserted Attributes count " + register + " % " + (register * 100 / dataSqlServer.Count()));
-                    showRegister += 1000;
+                    showRegister += 200;
                 }
             }
+
+            //using (IDbConnection db = contextMySql.Database.GetDbConnection())
+            //{
+            //    var query = "UPDATE `luegopago`.`wp_woocommerce_attribute_taxonomies` SET `attribute_public` = 0 WHERE (`attribute_public` = 1);";
+            //    db.Execute(query);
+            //    MySqlCommand cmd = new MySqlCommand();
+            //}
+        }
+
+        private static string RemoveDiacritics(string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
         }
 
         public static void WriteToNewExcel(List<Categorias> excelExportModels, string path)
