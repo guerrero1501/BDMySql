@@ -63,6 +63,7 @@ namespace BDMySql
 
             var register = -1;
             var showRegister = 1000;
+            var count = dataSqlServer.Count();
             foreach (var data in dataSqlServer)
             {
                 register++;
@@ -120,14 +121,19 @@ namespace BDMySql
 
                     contextMySql.SaveChanges();
                 }
-                if (register == showRegister)
-                {
-                    Console.WriteLine("Inserted Categories" + data.CategId + " count " + register + " % " + (register * 100 / dataSqlServer.Count()));
-                    showRegister += 1000;
-                }
+                var processTask = Task.Run(() => Process(register, ref showRegister, data.CategId, count));
             }
 
             await contextSqlServer.SaveChangesAsync();          
+        }
+
+        private static void Process(int register,ref int showRegister, string categId, int count)
+        {
+            if (register == showRegister)
+            {
+                Console.WriteLine("Inserted Categories" + categId + " count " + register + " % " + (register * 100 / count));
+                showRegister += 1000;
+            }
         }
 
         private static async Task InsertAttributes()
